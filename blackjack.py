@@ -99,11 +99,7 @@ def valid_bet(curBet, curBalance):
 		sys.exit()
 	return tempVal
 
-def split_hand():
-	print('#todo')
-	return 0
-
-def valid_choice():
+def split_hand(player, cards):
 	print('#todo')
 	return 0
 
@@ -172,27 +168,36 @@ while True:
 				print('[1] Hit')
 				print('[2] Stand')
 				print('[3] Double Down')
+				print('[4] Split')
 				choice = input('Your choice: ')
 		
-				while choice != '1' and choice != '2' and choice != '3' or choice == '3' and int(balance) < int(bet) *2:
+				while choice != '1' and choice != '2' and choice != '3' and choice != '4' or choice == '4' and int(balance) < (int(balance) + int(bet)) or choice == '3' and int(balance) < int(bet) *2:
 					print('Please enter a valid choice (you may only double down if you have enough chips!)')
 					print('[1] Hit')
 					print('[2] Stand')
 					print('[3] Double Down')
+					print('[4] Split')
 					choice = input('Your choice: ')	
 				if choice == '1':
 					player[cur_hand-1].hitMe(cards)
+					break
 				elif choice == '2':
 					print('Standing')
 					standing = True
 					while dealer.handTotal() <= 16:
 						dealer.hitMe(cards)
+					break
 				elif choice == '3':
 					standing = True
 					player[cur_hand-1].hitMe(cards)
 					bet = int(bet) * 2
 					while dealer.handTotal() <= 16:
 						dealer.hitMe(cards)
+					break
+				elif choice == '4':
+					print('Split detected')
+					break
+					
 				
 			cur_hand+=1
 	
