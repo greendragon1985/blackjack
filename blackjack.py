@@ -16,13 +16,13 @@ class Hand:
 
 	def printHand(self, standing):
 		if self.person == 'dealer' and standing:
-			print('Dealer cards: [{}] ({})'.format(']['.join(cur_hand), calc_hand(self.cur_hand)))
+			print('Dealer cards: [{}] ({})'.format(']['.join(self.cur_hand), calc_hand(self.cur_hand)))
 		elif self.person == 'dealer' and not standing:
 			print('Dealer cards: [{}][?]'.format(self.cur_hand[0]))
 		elif self.person == 'player':
 			print('Player cards: [{}] ({})'.format(']['.join(self.cur_hand), calc_hand(self.cur_hand)))
 
-	def handTotal(self)
+	def handTotal(self):
 		return calc_hand(self.cur_hand)
 
 #starts a new set of hands over
@@ -110,7 +110,7 @@ def valid_choice():
 #prints all hands
 def printAll(dealer, player, standing):
 	dealer.printHand(standing)
-	for curHand in player
+	for curHand in player:
 		curHand.printHand(standing)
 	
 
@@ -131,65 +131,69 @@ while True:
 	while valid_bet(bet, balance) == -1:
 		bet = input('Please enter a valid bet (greater than 0, at most balance) or leave the game with "Leave": ')
 
-	player, dealer, cards = start_game(cards)
 
+	player, dealer, cards = start_game(cards)
 	while True:
 		os.system('cls' if os.name == 'nt' else 'clear')
 	
-		printAll(dealer, player, standing)
 
 		if standing:
-			if dealer_score > 21:
+			printAll(dealer, player, standing)
+			if dealer.handTotal() > 21:
 				print('Dealer busted, you win!')
 				balance = int(bet) + int(balance)
-			elif player_score == dealer_score:
+			elif player[0].handTotal() == dealer.handTotal():
 				print('Push! No one wins!')
-			elif player_score > dealer_score:
+			elif player[0].handTotal() > dealer.handTotal():
 				print('You win!')
 				balance = int(bet) + int(balance)
 			else:
 				print('You lose')
 				balance = int(balance) - int(bet)
-	
+
 			break
 	
 	
-		if player_score > 21:
+		if player[0].handTotal() > 21:
 			print('You busted!')
 			balance = int(balance) - int(bet)
 			break
 		
-		if start_hand and  calc_hand(== 21:
+		if start_hand and player[0].handTotal() == 21:
 			balance = int(balance) + 1.5*int(bet)
 			print('Blackjack, you win!')
 			break
 
 		while cur_hand <= player_hands:
-			start_hand = False
-			print('What would you like to do?')
-			print('[1] Hit')
-			print('[2] Stand')
-			print('[3] Double Down')
-			choice = input('Your choice: ')
-		
-			while choice != '1' and choice != '2' and choice != '3' or choice == '3' and int(balance) < int(bet) *2:
-				print('Please enter a valid choice (you may only double down if you have enough chips!)')
+			if player[cur_hand-1].handTotal() < 22:
+				printAll(dealer, player, standing)
+				start_hand = False
+				print('What would you like to do?')
 				print('[1] Hit')
 				print('[2] Stand')
 				print('[3] Double Down')
-				choice = input('Your choice: ')	
-			if choice == '1':
-				player[cur_hand].hitMe(cards)
-			elif choice == '2':
-				standing = True
-				while calc_hand(dealer) <= 16:
-					dealer.append(cards.pop())
-			elif choice == '3':
-				standing = True
-				player.append(cards.pop())
-				bet = int(bet) * 2
-				while calc_hand(dealer) <= 16:
-					dealer.append(cards.pop())
-	
+				choice = input('Your choice: ')
+		
+				while choice != '1' and choice != '2' and choice != '3' or choice == '3' and int(balance) < int(bet) *2:
+					print('Please enter a valid choice (you may only double down if you have enough chips!)')
+					print('[1] Hit')
+					print('[2] Stand')
+					print('[3] Double Down')
+					choice = input('Your choice: ')	
+				if choice == '1':
+					player[cur_hand-1].hitMe(cards)
+				elif choice == '2':
+					print('Standing')
+					standing = True
+					while dealer.handTotal() <= 16:
+						dealer.hitMe(cards)
+				elif choice == '3':
+					standing = True
+					player[cur_hand-1].hitMe(cards)
+					bet = int(bet) * 2
+					while dealer.handTotal() <= 16:
+						dealer.hitMe(cards)
+				
+			cur_hand+=1
 	
 		
