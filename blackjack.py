@@ -25,6 +25,12 @@ class Hand:
 	def handTotal(self):
 		return calc_hand(self.cur_hand)
 
+	def splitAdd(self, new_card):
+		self.cur_hand.append(new_card)
+
+	def splitDelete:
+		return self.cur_hand.pop()
+
 #starts a new set of hands over
 def start_game(cards):
 	dealerSet = Hand('dealer')
@@ -72,15 +78,15 @@ def calc_hand(hand):
 #creates a new shuffled deck to return
 def init_deck():
 	newDeck = [
-			'2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
-			'2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
-			'2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A',
-			'2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'
+			'2\u2663', '3\u2663', '4\u2663', '5\u2663', '6\u2663', '7\u2663', '8\u2663', '9\u2663', '10\u2663', 'J\u2663', 'Q\u2663', 'K\u2663', 'A\u2663',
+			'2\u2660', '3\u2660', '4\u2660', '5\u2660', '6\u2660', '7\u2660', '8\u2660', '9\u2660', '10\u2660', 'J\u2660', 'Q\u2660', 'K\u2660', 'A\u2660',
+			'2\u2666', '3\u2666', '4\u2666', '5\u2666', '6\u2666', '7\u2666', '8\u2666', '9\u2666', '10\u2666', 'J\u2666', 'Q\u2666', 'K\u2666', 'A\u2666',
+			'2\u2665', '3\u2665', '4\u2665', '5\u2665', '6\u2665', '7\u2665', '8\u2665', '9\u2665', '10\u2665', 'J\u2665', 'Q\u2665', 'K\u2665', 'A\u2665'
 		]
 	random.shuffle(newDeck)
 	return newDeck
 
-#helper function to determine if bet is ok or not
+#helper function to determine if bet[0] is ok or not
 def valid_bet(curBet, curBalance):
 	tempVal = -3 #default value, -3 exits with error
 	try:
@@ -95,13 +101,17 @@ def valid_bet(curBet, curBalance):
 			tempVal = -1 #not an int, but also not leave
 
 	if tempVal == -3:
-		print('Error in valid_bet')
+		print('Error in valid_bet[0]')
 		sys.exit()
 	return tempVal
 
-def split_hand(player, cards):
-	print('#todo')
-	return 0
+def split_hand(player, cards, this_hand, total_hands):
+	player.append(Hand('player'))
+	total_hands+=1
+	player[total_hands-1].splitAdd(player[this_hand-1].splitDelete())
+	player[total_hands-1].hitMe(cards)
+	player[this_hand-1].hitMe(cards)
+	return player, cards, total_hands
 
 #prints all hands
 def printAll(dealer, player, standing):
@@ -122,10 +132,11 @@ while True:
 		print('You\'re broke!')
 		break
 	
+	bet = []
 	print('Current balance: {}'.format(balance))
-	bet = input('Place your bet, or exit the game with "Leave": ')
-	while valid_bet(bet, balance) == -1:
-		bet = input('Please enter a valid bet (greater than 0, at most balance) or leave the game with "Leave": ')
+	bet.append(input('Place your bet, or exit the game with "Leave": '))
+	while valid_bet(bet[0], balance) == -1:
+		bet[0] = input('Please enter a valid bet[0] (greater than 0, at most balance) or leave the game with "Leave": ')
 
 
 	player, dealer, cards = start_game(cards)
@@ -137,26 +148,26 @@ while True:
 			printAll(dealer, player, standing)
 			if dealer.handTotal() > 21:
 				print('Dealer busted, you win!')
-				balance = int(bet) + int(balance)
+				balance = int(bet[0]) + int(balance)
 			elif player[0].handTotal() == dealer.handTotal():
 				print('Push! No one wins!')
 			elif player[0].handTotal() > dealer.handTotal():
 				print('You win!')
-				balance = int(bet) + int(balance)
+				balance = int(bet[0]) + int(balance)
 			else:
 				print('You lose')
-				balance = int(balance) - int(bet)
+				balance = int(balance) - int(bet[0])
 
 			break
 	
 	
 		if player[0].handTotal() > 21:
 			print('You busted!')
-			balance = int(balance) - int(bet)
+			balance = int(balance) - int(bet[0])
 			break
 		
 		if start_hand and player[0].handTotal() == 21:
-			balance = int(balance) + 1.5*int(bet)
+			balance = int(balance) + 1.5*int(bet[0])
 			print('Blackjack, you win!')
 			break
 
@@ -171,7 +182,7 @@ while True:
 				print('[4] Split')
 				choice = input('Your choice: ')
 		
-				while choice != '1' and choice != '2' and choice != '3' and choice != '4' or choice == '4' and int(balance) < (int(balance) + int(bet)) or choice == '3' and int(balance) < int(bet) *2:
+				while choice != '1' and choice != '2' and choice != '3' and choice != '4' or choice == '4' and int(balance) < (int(totalBet) + int(bet[cur_hand-1])) or choice == '3' and int(balance) < int(bet[cur_hand-1]) *2:
 					print('Please enter a valid choice (you may only double down if you have enough chips!)')
 					print('[1] Hit')
 					print('[2] Stand')
@@ -190,12 +201,13 @@ while True:
 				elif choice == '3':
 					standing = True
 					player[cur_hand-1].hitMe(cards)
-					bet = int(bet) * 2
+					bet[cur_hand-1] = int(bet[cur_hand-1]) * 2
 					while dealer.handTotal() <= 16:
 						dealer.hitMe(cards)
 					break
 				elif choice == '4':
 					print('Split detected')
+
 					break
 					
 				
